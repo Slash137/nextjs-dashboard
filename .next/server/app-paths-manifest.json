@@ -1,3 +1,6 @@
 {
-  "/seed/route": "app/seed/route.js"
+  "/seed/route": "app/seed/route.js",
+  "/page": "app/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/invoices/page": "app/dashboard/invoices/page.js"
 }
