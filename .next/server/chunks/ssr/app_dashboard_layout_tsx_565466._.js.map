@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///home/cayetano/Proyectos/Apache2/nextjs-dashboard/app/dashboard/layout.tsx"],"sourcesContent":["import SideNav from '@/app/ui/dashboard/sidenav';\n\nexport default function Layout({ children }: {children: React.ReactNode }) {\n    return (\n        <div className=\"flex h-screen flex-col md:flex-row md:overflow-hidden\">\n            <div className=\"w-full flex-none md:w-64\">\n                <SideNav />\n            </div>\n        </div>\n    )\n}"],"names":[],"mappings":";;;;AAAA;;;AAEe,SAAS,OAAO,EAAE,QAAQ,EAAgC;IACrE,qBACI,6WAAC;QAAI,WAAU;kBACX,cAAA,6WAAC;YAAI,WAAU;sBACX,cAAA,6WAAC,kIAAA,CAAA,UAAO;;;;;;;;;;;;;;;AAIxB"}},
-    {"offset": {"line": 35, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
-}
