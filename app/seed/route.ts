@@ -1,4 +1,3 @@
-// //route.ts
 // import bcrypt from 'bcrypt';
 // import { invoices, customers, revenue, users } from '../lib/placeholder-data';
 // import pg from 'pg'
