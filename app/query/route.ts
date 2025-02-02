@@ -1,7 +1,8 @@
 import connectionPool from '../../db';
+const sql = connectionPool;
 
 async function listInvoices() {
-	const data = await connectionPool.query(`
+	const data = await sql.query(`
     SELECT invoices.amount, customers.name
     FROM invoices
     JOIN customers ON invoices.customer_id = customers.id
