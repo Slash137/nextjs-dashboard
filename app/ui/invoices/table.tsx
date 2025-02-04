@@ -11,12 +11,14 @@ export default async function InvoicesTable({
   query: string;
   currentPage: number;
 }) {
+  // Obtiene la lista de facturas filtradas según la consulta y la página actual
   const invoices = await fetchFilteredInvoices(query, currentPage);
 
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
+          {/* Vista para pantallas pequeñas (móviles) */}
           <div className="md:hidden">
             {invoices?.map((invoice) => (
               <div
@@ -25,6 +27,7 @@ export default async function InvoicesTable({
               >
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
+                    {/* Imagen de perfil y nombre del cliente */}
                     <div className="mb-2 flex items-center">
                       <Image
                         src={invoice.image_url}
@@ -35,17 +38,21 @@ export default async function InvoicesTable({
                       />
                       <p>{invoice.name}</p>
                     </div>
+                    {/* Correo electrónico del cliente */}
                     <p className="text-sm text-gray-500">{invoice.email}</p>
                   </div>
+                  {/* Estado de la factura */}
                   <InvoiceStatus status={invoice.status} />
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
                   <div>
+                    {/* Monto de la factura y fecha */}
                     <p className="text-xl font-medium">
                       {formatCurrency(invoice.amount)}
                     </p>
                     <p>{formatDateToLocal(invoice.date)}</p>
                   </div>
+                  {/* Botones de editar y eliminar */}
                   <div className="flex justify-end gap-2">
                     <UpdateInvoice id={invoice.id} />
                     <DeleteInvoice id={invoice.id} />
@@ -54,6 +61,7 @@ export default async function InvoicesTable({
               </div>
             ))}
           </div>
+          {/* Tabla para pantallas más grandes (escritorio) */}
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
@@ -83,6 +91,7 @@ export default async function InvoicesTable({
                   key={invoice.id}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
+                  {/* Cliente */}
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
                       <Image
@@ -95,18 +104,23 @@ export default async function InvoicesTable({
                       <p>{invoice.name}</p>
                     </div>
                   </td>
+                  {/* Correo electrónico */}
                   <td className="whitespace-nowrap px-3 py-3">
                     {invoice.email}
                   </td>
+                  {/* Monto */}
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatCurrency(invoice.amount)}
                   </td>
+                  {/* Fecha */}
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatDateToLocal(invoice.date)}
                   </td>
+                  {/* Estado */}
                   <td className="whitespace-nowrap px-3 py-3">
                     <InvoiceStatus status={invoice.status} />
                   </td>
+                  {/* Botones de edición y eliminación */}
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
                       <UpdateInvoice id={invoice.id} />
