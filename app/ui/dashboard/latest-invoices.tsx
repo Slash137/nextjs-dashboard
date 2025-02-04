@@ -2,7 +2,17 @@ import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
+import InvoiceStatus from '@/app/ui/invoices/status';
 import { fetchLatestInvoices } from '@/app/lib/data';
+import {
+  ClockIcon,
+  CurrencyDollarIcon,
+} from '@heroicons/react/24/outline';
+
+const iconMap = {
+  pending: ClockIcon,
+  paid: CurrencyDollarIcon
+}
 
 export default async function LatestInvoices() {
   const latestInvoices = await fetchLatestInvoices();
@@ -45,9 +55,10 @@ export default async function LatestInvoices() {
                   </div>
                 </div>
                 <p
-                  className={`${lusitana.className} truncate text-sm font-medium md:text-base`}
-                >
-                  {invoice.amount}
+                  className={`${lusitana.className} flex items-center truncate text-sm font-medium md:text-base`}
+                >     
+                  <InvoiceStatus status={invoice.status} /> 
+                  <span className="ml-2">{invoice.amount}</span>
                 </p>
               </div>
             );

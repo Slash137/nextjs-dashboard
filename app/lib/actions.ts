@@ -39,8 +39,8 @@ export async function createInvoice(formData: FormData) {
 
     // 2. Transformación de datos
     const amountInCents = amount * 100; // Convertir a centavos para evitar decimales
-    const date = new Date().toISOString().split('T')[0]; // Fecha actual en YYYY-MM-DD
-
+    const date = new Date().toISOString().split('.')[0].replace("T", " "); // Fecha actual en YYYY-MM-DDTHH:mm:ss
+    
     // 3. Inserción en base de datos usando parámetros seguros
     await client.query(
       `INSERT INTO invoices (customer_id, amount, status, date)
