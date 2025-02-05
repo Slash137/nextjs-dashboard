@@ -57,7 +57,7 @@ export default async function LatestInvoices() {
                 <p
                   className={`${lusitana.className} flex items-center truncate text-sm font-medium md:text-base`}
                 >     
-                  <InvoiceStatus status={invoice.status} /> 
+                  <span className="hidden md:inline-flex"><InvoiceStatus status={invoice.status} /></span>
                   <span className="ml-2">{invoice.amount}</span>
                 </p>
               </div>
