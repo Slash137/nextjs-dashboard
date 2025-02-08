@@ -1,0 +1,13 @@
+# Exclusiones estándar
+**/node_modules
+**/.next
+**/.git
+**/.pnpm-store
+**/.env*.local
+**/dist
+**/Dockerfile*
+**/docker-compose*
+**/README.md
+**/.vscode
+**/coverage
+**/.DS_Store

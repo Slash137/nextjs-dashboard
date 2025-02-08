@@ -14,7 +14,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
     "next": "latest",
-    "next-auth": "5.0.0-beta.19",
+    "next-auth": "5.0.0-beta.25",
     "pg": "^8.13.1",
     "postcss": "8.4.49",
     "react": "19.0.0",
@@ -29,5 +29,9 @@
     "@types/node": "22.10.1",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0"
+  },
+  "packageManager": "pnpm@10.2.1",
+  "pnpm": {
+    "neverBuiltDependencies": []
   }
 }

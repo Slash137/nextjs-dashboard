@@ -1,0 +1,32 @@
+FROM node:22-alpine
+
+# Instalar dependencias necesarias
+RUN apk add --no-cache openssl git curl
+
+# Configurar Corepack para evitar verificación de firmas
+# RUN corepack enable && echo "disable-integrity-check = true" > ~/.npmrc && corepack prepare pnpm@10.2.1 --activate
+# RUN corepack enable && corepack prepare pnpm@10.2.1 --activate
+
+# RUN corepack enable && corepack hydrate
+# RUN corepack prepare pnpm@latest --activate
+
+RUN npm install -g pnpm@10.2.1
+
+
+# Configurar entorno PNPM
+ENV PNPM_HOME=/pnpm
+ENV PATH="$PNPM_HOME/bin:$PATH"
+
+WORKDIR /app
+
+# Copiar archivos esenciales primero
+COPY package.json pnpm-lock.yaml* .npmrc* ./
+
+# Instalar dependencias
+RUN pnpm install --frozen-lockfile --strict-peer-dependencies
+
+# Copiar el resto del código
+COPY . .
+
+EXPOSE 3000
+CMD ["pnpm", "run", "dev", "--hostname", "0.0.0.0"]

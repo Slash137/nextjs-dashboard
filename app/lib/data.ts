@@ -49,7 +49,8 @@ export async function fetchLatestInvoices(): Promise<LatestInvoice[]> {
       SELECT invoices.amount, invoices.status, customers.name, customers.image_url, customers.email, invoices.id
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
-      ORDER BY invoices.date DESC
+      --WHERE invoices.status LIKE 'pending'
+      ORDER BY invoices.date DESC, customers.name, invoices.status DESC, invoices.amount DESC
       LIMIT 5`);
 
     // Formatear el monto de las facturas
@@ -135,7 +136,7 @@ export async function fetchFilteredInvoices(
         invoices.amount::text ILIKE '%${query}%' OR
         invoices.date::text ILIKE '%${query}%' OR
         invoices.status ILIKE '%${query}%'
-      ORDER BY invoices.date DESC
+      ORDER BY invoices.date DESC, customers.name, invoices.status DESC, invoices.amount DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `);
     return result.rows;
