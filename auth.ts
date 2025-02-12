@@ -8,10 +8,8 @@ import pg from 'pg';
 
 // Configuración de la conexión a PostgreSQL
 const { Pool } = pg;
-const pool = new Pool({ // Pool de conexiones para manejar múltiples clientes
-  connectionString: process.env.POSTGRES_URL,
-  ssl: false
-});
+const pool = new Pool(); // Pool de conexiones para manejar múltiples clientes
+// const pool = new Pool({ ssl: true }); // Pool de conexiones seguras para manejar múltiples clientes
 
 async function getUser(email: string): Promise<User | undefined> {
   const client = await pool.connect();
@@ -45,7 +43,7 @@ export const { auth, signIn, signOut } = NextAuth({
           }
 
           // Log para verificar la contraseña almacenada
-          console.log('Stored password:', user.password);
+          // console.log('Stored password:', user.password);
 
           const passwordsMatch = await bcrypt.compare(password, user.password);
           if (passwordsMatch) {

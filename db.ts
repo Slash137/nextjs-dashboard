@@ -8,7 +8,7 @@ const connectionPool = new Pool({
   database: process.env.POSTGRES_DATABASE,
   password: process.env.POSTGRES_PASSWORD,
   port: 5432,
-  ssl: false,
+  ssl: true,
 });
 
 module.exports = connectionPool;

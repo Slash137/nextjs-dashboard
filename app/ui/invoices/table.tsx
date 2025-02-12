@@ -11,6 +11,7 @@ export default async function InvoicesTable({
   query: string;
   currentPage: number;
 }) {
+  
   // Obtiene la lista de facturas filtradas según la consulta y la página actual
   const invoices = await fetchFilteredInvoices(query, currentPage);
 

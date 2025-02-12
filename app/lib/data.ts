@@ -98,6 +98,27 @@ export async function fetchCardData() {
   }
 }
 
+/**
+ * Obtiene todos los clientes ordenados por nombre
+ * @returns Promise<CustomerField[]> - Lista de clientes
+ */
+export async function fetchCustomers(): Promise<CustomerField[]> {
+  const client = await pool.connect();
+  try {
+    const data = await client.query(`
+      SELECT id, name
+      FROM customers
+      ORDER BY name ASC
+    `);
+    return data.rows;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all customers.');
+  } finally {
+    client.release();
+  }
+}
+
 // ================================================
 // Funciones para paginación y filtrado
 // ================================================
@@ -149,7 +170,7 @@ export async function fetchFilteredInvoices(
 }
 
 /**
- * Calcula el número total de páginas para la paginación
+ * Calcula el número total de páginas para la paginación de facturas
  * @param query - Término de búsqueda
  * @returns Número total de páginas
  */
@@ -167,6 +188,82 @@ export async function fetchInvoicesPages(query: string) {
         invoices.amount::text ILIKE '%${query}%' OR
         invoices.date::text ILIKE '%${query}%' OR
         invoices.status ILIKE '%${query}%'
+    `);
+    return Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of invoices.');
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Obtiene clientes filtrados con métricas financieras
+ * @param query - Término de búsqueda
+ * @param currentPage - Página actual
+ * @returns Promise<CustomersTableType[]> - Clientes con datos financieros
+ */
+export async function fetchFilteredCustomers(
+  query: string,
+  currentPage: number,
+): Promise<CustomersTableType[]> {
+  const client = await pool.connect();
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  // await new Promise((resolve) => setTimeout(resolve, 3000));
+
+  try {
+    // Consulta compleja con agregaciones
+    const data = await client.query(`
+      SELECT
+        customers.id,
+        customers.name,
+        customers.email,
+        customers.image_url,
+        COUNT(invoices.id) AS total_invoices,
+        SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
+        SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
+      FROM customers
+      LEFT JOIN invoices ON customers.id = invoices.customer_id
+      WHERE
+        customers.name ILIKE '%${query}%' OR
+        customers.email ILIKE '%${query}%'
+      GROUP BY customers.id, customers.name, customers.email, customers.image_url
+      ORDER BY customers.name ASC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `);
+
+    // Formatear montos monetarios
+    return data.rows.map(customer => ({
+      ...customer,
+      total_pending: formatCurrency(customer.total_pending),
+      total_paid: formatCurrency(customer.total_paid),
+    }));
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch customer table.');
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Calcula el número total de páginas para la paginación de clientes
+ * @param query - Término de búsqueda
+ * @returns Número total de páginas
+ */
+export async function fetchCustomersPages(query: string): Promise<CustomersTable[]> {
+  const client = await pool.connect();
+
+  try {
+    // Conteo total de registros filtrados
+    const count = await client.query(`
+      SELECT COUNT(*)
+      FROM customers
+      WHERE
+        customers.name ILIKE '%${query}%' OR
+        customers.email ILIKE '%${query}%'
     `);
     return Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
   } catch (error) {
@@ -215,62 +312,42 @@ export async function fetchInvoiceById(id: string): Promise<InvoiceForm> {
 }
 
 /**
- * Obtiene todos los clientes ordenados por nombre
- * @returns Promise<CustomerField[]> - Lista de clientes
+ * Obtiene una factura por ID y formatea su monto
+ * @param id - ID de la factura
+ * @returns Promise<CustomerForm> - Datos de la factura
  */
-export async function fetchCustomers(): Promise<CustomerField[]> {
+export async function fetchCustomerById(id: string): Promise<CustomerForm> {
   const client = await pool.connect();
   try {
-    const data = await client.query(`
-      SELECT id, name
-      FROM customers
-      ORDER BY name ASC
-    `);
-    return data.rows;
-  } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch all customers.');
-  } finally {
-    client.release();
-  }
-}
-
-/**
- * Obtiene clientes filtrados con métricas financieras
- * @param query - Término de búsqueda
- * @returns Promise<CustomersTableType[]> - Clientes con datos financieros
- */
-export async function fetchFilteredCustomers(query: string): Promise<CustomersTableType[]> {
-  const client = await pool.connect();
-  try {
-    // Consulta compleja con agregaciones
+    // Consulta simple por ID (⚠️ riesgo de SQL injection)
     const data = await client.query(`
       SELECT
-        customers.id,
-        customers.name,
-        customers.email,
-        customers.image_url,
-        COUNT(invoices.id) AS total_invoices,
-        SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
-        SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
+          customers.id,
+          customers.name,
+          customers.email,
+          customers.image_url,
+          COUNT(invoices.id) AS total_invoices,
+          SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
+          SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
       FROM customers
       LEFT JOIN invoices ON customers.id = invoices.customer_id
-      WHERE
-        customers.name ILIKE '%${query}%' OR
-        customers.email ILIKE '%${query}%'
-      GROUP BY customers.id, customers.name, customers.email, customers.image_url
-      ORDER BY customers.name ASC
-    `);
-
-    // Formatear montos monetarios
+      WHERE customers.id = $1
+      GROUP BY
+          customers.id,
+          customers.name,
+          customers.email,
+          customers.image_url;`,
+      [id]
+    );
+    
     return data.rows.map(customer => ({
       ...customer,
       total_pending: formatCurrency(customer.total_pending),
       total_paid: formatCurrency(customer.total_paid),
-    }));
-  } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch customer table.');
+    }))[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch customer.');
   } finally {
     client.release();
   }
